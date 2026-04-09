@@ -1,3 +1,10 @@
+import { notFound } from "next/navigation";
+import { getTenantContext } from "@/lib/auth/tenant";
+import { db } from "@/lib/db";
+import { floorScans } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
+import { ScanDetailClient } from "./client";
+
 export default async function ScanDetailPage({
   params,
 }: {
@@ -5,16 +12,22 @@ export default async function ScanDetailPage({
 }) {
   const { scanId } = await params;
 
-  return (
-    <div className="p-4 md:p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Scan Result</h1>
-        <p className="text-gray-600">Scan ID: {scanId}</p>
-      </div>
+  let scan;
+  try {
+    const { companyId } = await getTenantContext();
+    const [result] = await db
+      .select()
+      .from(floorScans)
+      .where(
+        and(eq(floorScans.id, scanId), eq(floorScans.companyId, companyId))
+      )
+      .limit(1);
+    scan = result;
+  } catch {
+    notFound();
+  }
 
-      <div className="text-center py-12 text-gray-500">
-        Scan result view coming in Phase 3
-      </div>
-    </div>
-  );
+  if (!scan) notFound();
+
+  return <ScanDetailClient scan={scan} />;
 }

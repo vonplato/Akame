@@ -1,6 +1,27 @@
+import Link from "next/link";
+import { getTenantContext } from "@/lib/auth/tenant";
+import { db } from "@/lib/db";
+import { floorScans, floorTypes } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-export default function HistoryPage() {
+const statusColors: Record<string, string> = {
+  pending: "bg-yellow-100 text-yellow-800",
+  processing: "bg-blue-100 text-blue-800",
+  completed: "bg-green-100 text-green-800",
+  failed: "bg-red-100 text-red-800",
+};
+
+export default async function HistoryPage() {
+  let scans: Awaited<ReturnType<typeof fetchScans>> = [];
+
+  try {
+    scans = await fetchScans();
+  } catch {
+    // No org selected or DB not connected — show empty state
+  }
+
   return (
     <div className="p-4 md:p-8">
       <div className="mb-8">
@@ -8,19 +29,83 @@ export default function HistoryPage() {
         <p className="text-gray-600">View all past floor scans</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Scans</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-gray-500">No scans yet</p>
-            <p className="mt-1 text-sm text-gray-400">
-              Scans will appear here after you take your first photo
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {scans.length === 0 ? (
+        <Card>
+          <CardContent className="py-12">
+            <div className="flex flex-col items-center justify-center text-center">
+              <p className="text-gray-500">No scans yet</p>
+              <p className="mt-1 text-sm text-gray-400">
+                Scans will appear here after you take your first photo
+              </p>
+              <Link
+                href="/scan"
+                className="mt-4 text-sm font-medium text-blue-600 hover:underline"
+              >
+                Take your first scan
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {scans.map((scan) => (
+            <Link key={scan.id} href={`/scan/${scan.id}`}>
+              <Card className="transition-colors hover:bg-gray-50">
+                <CardContent className="flex items-center gap-4 py-4">
+                  {/* Thumbnail */}
+                  <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                    {scan.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={scan.imageUrl}
+                        alt="Floor scan"
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 truncate">
+                      {scan.projectName || "Untitled Scan"}
+                    </p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {scan.location || "No location"}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(scan.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+
+                  {/* Status */}
+                  <Badge
+                    variant="secondary"
+                    className={statusColors[scan.status] || ""}
+                  >
+                    {scan.status}
+                  </Badge>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
+}
+
+async function fetchScans() {
+  const { companyId } = await getTenantContext();
+  return db
+    .select()
+    .from(floorScans)
+    .where(eq(floorScans.companyId, companyId))
+    .orderBy(desc(floorScans.createdAt))
+    .limit(50);
 }
