@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScanResultCard } from "@/components/scan/scan-result-card";
 import { CorrectionForm } from "@/components/scan/correction-form";
+import { CostEstimate } from "@/components/scan/cost-estimate";
 import type { FloorScan } from "@/lib/db/schema";
 import type { FloorIdentificationResult } from "@/lib/ai/parse-result";
 
@@ -110,6 +111,9 @@ export function ScanDetailClient({ scan: initialScan }: ScanDetailClientProps) {
         {scan.status === "completed" && aiResult && (
           <>
             <ScanResultCard result={aiResult} />
+
+            {/* Cost estimate */}
+            <CostEstimate floorCategory={aiResult.floor_category} />
 
             {/* Human-in-the-loop correction */}
             {!reviewed && (
