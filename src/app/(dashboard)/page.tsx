@@ -6,6 +6,7 @@ import { getTenantContext } from "@/lib/auth/tenant";
 import { db } from "@/lib/db";
 import { floorScans } from "@/lib/db/schema";
 import { eq, and, count, desc, gte } from "drizzle-orm";
+import { STATUS_COLORS } from "@/lib/constants";
 
 async function getStats(companyId: string) {
   const now = new Date();
@@ -52,13 +53,6 @@ async function getRecentScans(companyId: string) {
     .orderBy(desc(floorScans.createdAt))
     .limit(5);
 }
-
-const statusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  processing: "bg-blue-100 text-blue-800",
-  completed: "bg-green-100 text-green-800",
-  failed: "bg-red-100 text-red-800",
-};
 
 export default async function DashboardPage() {
   let stats = { total: 0, awaiting: 0, thisMonth: 0 };
@@ -167,7 +161,7 @@ export default async function DashboardPage() {
                     </div>
                     <Badge
                       variant="secondary"
-                      className={statusColors[scan.status] || ""}
+                      className={STATUS_COLORS[scan.status] || ""}
                     >
                       {scan.status}
                     </Badge>

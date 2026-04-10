@@ -1,33 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ConfidenceBadge } from "./confidence-badge";
+import { CATEGORY_LABEL_MAP, CONDITION_COLORS } from "@/lib/constants";
 import type { FloorIdentificationResult } from "@/lib/ai/parse-result";
 
 interface ScanResultCardProps {
   result: FloorIdentificationResult;
 }
-
-const categoryLabels: Record<string, string> = {
-  hardwood_solid: "Solid Hardwood",
-  hardwood_engineered: "Engineered Hardwood",
-  laminate: "Laminate",
-  vinyl_luxury: "Luxury Vinyl",
-  vinyl_sheet: "Sheet Vinyl",
-  ceramic_tile: "Ceramic Tile",
-  porcelain_tile: "Porcelain Tile",
-  natural_stone: "Natural Stone",
-  carpet: "Carpet",
-  concrete: "Concrete",
-  other: "Other / Specialty",
-};
-
-const conditionColors: Record<string, string> = {
-  excellent: "bg-green-100 text-green-800",
-  good: "bg-blue-100 text-blue-800",
-  fair: "bg-yellow-100 text-yellow-800",
-  poor: "bg-orange-100 text-orange-800",
-  critical: "bg-red-100 text-red-800",
-};
 
 const severityColors: Record<string, string> = {
   minor: "text-yellow-700",
@@ -50,7 +29,7 @@ export function ScanResultCard({ result }: ScanResultCardProps) {
           <div>
             <p className="text-sm text-gray-500">Category</p>
             <p className="text-lg font-semibold">
-              {categoryLabels[result.floor_category] || result.floor_category}
+              {CATEGORY_LABEL_MAP[result.floor_category] || result.floor_category}
             </p>
           </div>
           <div>
@@ -133,7 +112,7 @@ export function ScanResultCard({ result }: ScanResultCardProps) {
             <CardTitle className="text-lg">Condition Assessment</CardTitle>
             <Badge
               variant="secondary"
-              className={conditionColors[result.condition.rating] || ""}
+              className={CONDITION_COLORS[result.condition.rating] || ""}
             >
               {result.condition.rating} ({result.condition.score}/10)
             </Badge>

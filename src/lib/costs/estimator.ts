@@ -102,23 +102,10 @@ export async function estimateCost(
   };
 }
 
-// Map AI category slugs to DB category slugs
-const CATEGORY_SLUG_MAP: Record<string, string> = {
-  hardwood_solid: "hardwood-solid",
-  hardwood_engineered: "hardwood-engineered",
-  laminate: "laminate",
-  vinyl_luxury: "vinyl-luxury",
-  vinyl_sheet: "vinyl-sheet",
-  ceramic_tile: "ceramic-tile",
-  porcelain_tile: "porcelain-tile",
-  natural_stone: "natural-stone",
-  carpet: "carpet",
-  concrete: "concrete",
-  other: "other",
-};
+import { CATEGORY_DB_SLUG_MAP } from "@/lib/constants";
 
 export function aiCategoryToDbSlug(aiCategory: string): string {
-  return CATEGORY_SLUG_MAP[aiCategory] || aiCategory;
+  return CATEGORY_DB_SLUG_MAP[aiCategory] || aiCategory;
 }
 
 function round(n: number): number {

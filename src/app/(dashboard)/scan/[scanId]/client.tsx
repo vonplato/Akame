@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,11 +19,8 @@ interface ScanDetailClientProps {
 export function ScanDetailClient({ scan: initialScan }: ScanDetailClientProps) {
   const router = useRouter();
   const [scan, setScan] = useState(initialScan);
-  const [reviewed, setReviewed] = useState(
-    scan.reviewStatus !== "unreviewed"
-  );
+  const reviewed = scan.reviewStatus !== "unreviewed";
 
-  // Poll for completion if still processing
   useEffect(() => {
     if (scan.status !== "pending" && scan.status !== "processing") return;
 
@@ -32,7 +28,9 @@ export function ScanDetailClient({ scan: initialScan }: ScanDetailClientProps) {
       const res = await fetch(`/api/scans/${scan.id}`);
       if (res.ok) {
         const updated = await res.json();
-        setScan(updated);
+        if (updated.status !== scan.status || updated.updatedAt !== scan.updatedAt) {
+          setScan(updated);
+        }
         if (updated.status === "completed" || updated.status === "failed") {
           clearInterval(interval);
         }
@@ -40,7 +38,7 @@ export function ScanDetailClient({ scan: initialScan }: ScanDetailClientProps) {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [scan.id, scan.status]);
+  }, [scan.id, scan.status, scan.updatedAt]);
 
   const aiResult = scan.aiResult as FloorIdentificationResult | null;
 
@@ -121,7 +119,7 @@ export function ScanDetailClient({ scan: initialScan }: ScanDetailClientProps) {
                 scanId={scan.id}
                 aiResult={aiResult}
                 onSubmitted={() => {
-                  setReviewed(true);
+                  setScan((s) => ({ ...s, reviewStatus: "confirmed" }));
                   router.refresh();
                 }}
               />

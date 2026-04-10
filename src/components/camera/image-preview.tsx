@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -12,6 +12,10 @@ interface ImagePreviewProps {
 
 export function ImagePreview({ image, onConfirm, onRetake }: ImagePreviewProps) {
   const previewUrl = useMemo(() => URL.createObjectURL(image), [image]);
+
+  useEffect(() => {
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   return (
     <div className="flex flex-col items-center gap-4">

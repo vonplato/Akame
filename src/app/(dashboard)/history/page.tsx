@@ -1,17 +1,11 @@
 import Link from "next/link";
 import { getTenantContext } from "@/lib/auth/tenant";
 import { db } from "@/lib/db";
-import { floorScans, floorTypes } from "@/lib/db/schema";
+import { floorScans } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const statusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  processing: "bg-blue-100 text-blue-800",
-  completed: "bg-green-100 text-green-800",
-  failed: "bg-red-100 text-red-800",
-};
+import { STATUS_COLORS } from "@/lib/constants";
 
 export default async function HistoryPage() {
   let scans: Awaited<ReturnType<typeof fetchScans>> = [];
@@ -86,7 +80,7 @@ export default async function HistoryPage() {
                   {/* Status */}
                   <Badge
                     variant="secondary"
-                    className={statusColors[scan.status] || ""}
+                    className={STATUS_COLORS[scan.status] || ""}
                   >
                     {scan.status}
                   </Badge>

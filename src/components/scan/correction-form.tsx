@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { CATEGORY_SELECT_OPTIONS, CONDITION_SELECT_OPTIONS } from "@/lib/constants";
 import type { FloorIdentificationResult } from "@/lib/ai/parse-result";
 
 interface CorrectionFormProps {
@@ -19,28 +20,6 @@ interface CorrectionFormProps {
   aiResult: FloorIdentificationResult;
   onSubmitted: () => void;
 }
-
-const FLOOR_CATEGORIES = [
-  { value: "hardwood_solid", label: "Solid Hardwood" },
-  { value: "hardwood_engineered", label: "Engineered Hardwood" },
-  { value: "laminate", label: "Laminate" },
-  { value: "vinyl_luxury", label: "Luxury Vinyl" },
-  { value: "vinyl_sheet", label: "Sheet Vinyl" },
-  { value: "ceramic_tile", label: "Ceramic Tile" },
-  { value: "porcelain_tile", label: "Porcelain Tile" },
-  { value: "natural_stone", label: "Natural Stone" },
-  { value: "carpet", label: "Carpet" },
-  { value: "concrete", label: "Concrete" },
-  { value: "other", label: "Other / Specialty" },
-];
-
-const CONDITION_RATINGS = [
-  { value: "excellent", label: "Excellent" },
-  { value: "good", label: "Good" },
-  { value: "fair", label: "Fair" },
-  { value: "poor", label: "Poor" },
-  { value: "critical", label: "Critical" },
-];
 
 export function CorrectionForm({
   scanId,
@@ -97,7 +76,7 @@ export function CorrectionForm({
       onSubmitted();
     } catch {
       setError("Failed to submit correction");
-      setMode("submitting");
+      setMode("correcting");
     }
   };
 
@@ -153,7 +132,7 @@ export function CorrectionForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {FLOOR_CATEGORIES.map((c) => (
+              {CATEGORY_SELECT_OPTIONS.map((c) => (
                 <SelectItem key={c.value} value={c.value}>
                   {c.label}
                 </SelectItem>
@@ -180,7 +159,7 @@ export function CorrectionForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {CONDITION_RATINGS.map((r) => (
+              {CONDITION_SELECT_OPTIONS.map((r) => (
                 <SelectItem key={r.value} value={r.value}>
                   {r.label}
                 </SelectItem>

@@ -65,32 +65,6 @@ export function useCamera() {
     setIsActive(false);
   }, []);
 
-  const capture = useCallback((): Blob | null => {
-    const video = videoRef.current;
-    if (!video || !isActive) return null;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-
-    ctx.drawImage(video, 0, 0);
-
-    // Convert to blob synchronously via data URL, then return
-    // For async blob, use captureAsync instead
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-    const byteString = atob(dataUrl.split(",")[1]);
-    const mimeType = dataUrl.split(",")[0].split(":")[1].split(";")[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([ab], { type: mimeType });
-  }, [isActive]);
-
   const captureAsync = useCallback((): Promise<Blob | null> => {
     const video = videoRef.current;
     if (!video || !isActive) return Promise.resolve(null);
@@ -125,7 +99,6 @@ export function useCamera() {
     error,
     start,
     stop,
-    capture,
     captureAsync,
     flipCamera,
   };

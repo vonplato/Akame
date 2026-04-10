@@ -1,61 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/lib/db";
 import { floorScans, labels } from "@/lib/db/schema";
-import { count, eq, and, sql } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 async function getAnalytics() {
-  const [totalScans] = await db
-    .select({ total: count() })
-    .from(floorScans);
+  const [statusCounts, reviewCounts, labelCounts] = await Promise.all([
+    db
+      .select({ status: floorScans.status, total: count() })
+      .from(floorScans)
+      .groupBy(floorScans.status),
+    db
+      .select({ reviewStatus: floorScans.reviewStatus, total: count() })
+      .from(floorScans)
+      .groupBy(floorScans.reviewStatus),
+    db
+      .select({ aiAgreed: labels.aiAgreed, total: count() })
+      .from(labels)
+      .groupBy(labels.aiAgreed),
+  ]);
 
-  const [completedScans] = await db
-    .select({ total: count() })
-    .from(floorScans)
-    .where(eq(floorScans.status, "completed"));
-
-  const [totalLabels] = await db
-    .select({ total: count() })
-    .from(labels);
-
-  const [confirmedLabels] = await db
-    .select({ total: count() })
-    .from(labels)
-    .where(eq(labels.aiAgreed, true));
-
-  const [correctedLabels] = await db
-    .select({ total: count() })
-    .from(labels)
-    .where(eq(labels.aiAgreed, false));
-
+  const totalScans = statusCounts.reduce((sum, s) => sum + s.total, 0);
+  const completedScans = statusCounts.find((s) => s.status === "completed")?.total || 0;
+  const confirmedLabels = labelCounts.find((l) => l.aiAgreed)?.total || 0;
+  const correctedLabels = labelCounts.find((l) => !l.aiAgreed)?.total || 0;
+  const totalLabels = confirmedLabels + correctedLabels;
   const agreementRate =
-    totalLabels.total > 0
-      ? Math.round((confirmedLabels.total / totalLabels.total) * 100)
-      : 0;
-
-  // Scans by status
-  const statusCounts = await db
-    .select({
-      status: floorScans.status,
-      total: count(),
-    })
-    .from(floorScans)
-    .groupBy(floorScans.status);
-
-  // Review status distribution
-  const reviewCounts = await db
-    .select({
-      reviewStatus: floorScans.reviewStatus,
-      total: count(),
-    })
-    .from(floorScans)
-    .groupBy(floorScans.reviewStatus);
+    totalLabels > 0 ? Math.round((confirmedLabels / totalLabels) * 100) : 0;
 
   return {
-    totalScans: totalScans.total,
-    completedScans: completedScans.total,
-    totalLabels: totalLabels.total,
-    confirmedLabels: confirmedLabels.total,
-    correctedLabels: correctedLabels.total,
+    totalScans,
+    completedScans,
+    totalLabels,
+    confirmedLabels,
+    correctedLabels,
     agreementRate,
     statusCounts,
     reviewCounts,
