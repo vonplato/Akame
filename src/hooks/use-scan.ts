@@ -47,11 +47,13 @@ export function useScan() {
 
       // 1. Get presigned URL
       const contentType = state.image.type || "image/jpeg";
+      const size = state.image.size;
       const presignedRes = await fetch(
-        `/api/upload/presigned?contentType=${encodeURIComponent(contentType)}`
+        `/api/upload/presigned?contentType=${encodeURIComponent(contentType)}&size=${size}`
       );
       if (!presignedRes.ok) {
-        throw new Error("Failed to get upload URL");
+        const errBody = await presignedRes.json().catch(() => ({}));
+        throw new Error(errBody.error || "Failed to get upload URL");
       }
       const { uploadUrl, key, publicUrl } = await presignedRes.json();
 
@@ -60,7 +62,10 @@ export function useScan() {
       const uploadRes = await fetch(uploadUrl, {
         method: "PUT",
         body: state.image,
-        headers: { "Content-Type": contentType },
+        headers: {
+          "Content-Type": contentType,
+          "Content-Length": String(size),
+        },
       });
       if (!uploadRes.ok) {
         throw new Error("Failed to upload image");

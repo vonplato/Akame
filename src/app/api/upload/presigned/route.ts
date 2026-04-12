@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { getTenantContext } from "@/lib/auth/tenant";
-import { createPresignedUploadUrl } from "@/lib/storage/r2-client";
+import { createPresignedUploadUrl, MAX_UPLOAD_BYTES } from "@/lib/storage/r2-client";
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
 
     const contentType =
       req.nextUrl.searchParams.get("contentType") || "image/jpeg";
+    const size = parseInt(req.nextUrl.searchParams.get("size") || "0", 10);
 
     if (!contentType.startsWith("image/")) {
       return Response.json(
@@ -16,11 +17,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const result = await createPresignedUploadUrl(companyId, contentType);
+    if (!Number.isFinite(size) || size <= 0 || size > MAX_UPLOAD_BYTES) {
+      return Response.json(
+        { error: `Invalid size. Must be 1 byte to ${MAX_UPLOAD_BYTES} bytes (15 MB).` },
+        { status: 400 }
+      );
+    }
+
+    const result = await createPresignedUploadUrl(companyId, contentType, size);
 
     return Response.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Upload failed";
-    return Response.json({ error: message }, { status: 401 });
+    return Response.json({ error: message }, { status: 500 });
   }
 }

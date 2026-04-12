@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { notFound } from "next/navigation";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role;
+  if (role !== "platform_admin") notFound();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="border-b bg-white">

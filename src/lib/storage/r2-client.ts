@@ -19,9 +19,12 @@ function getR2Client() {
 
 const BUCKET = process.env.R2_BUCKET_NAME || "akame-floor-images";
 
+export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+
 export async function createPresignedUploadUrl(
   companyId: string,
-  contentType: string
+  contentType: string,
+  contentLength: number
 ) {
   const client = getR2Client();
   const now = new Date();
@@ -35,6 +38,7 @@ export async function createPresignedUploadUrl(
     Bucket: BUCKET,
     Key: key,
     ContentType: contentType,
+    ContentLength: contentLength,
   });
 
   const uploadUrl = await getSignedUrl(client, command, { expiresIn: 300 });
