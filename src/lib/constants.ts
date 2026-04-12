@@ -53,3 +53,14 @@ export const CONDITION_COLORS: Record<string, string> = {
   poor: "bg-orange-100 text-orange-800",
   critical: "bg-red-100 text-red-800",
 };
+
+export const SEVERITY_COLORS: Record<string, string> = {
+  minor: "text-yellow-700",
+  moderate: "text-orange-700",
+  severe: "text-red-700",
+};
+
+export const REVIEW_STATUS_COLORS: Record<string, string> = {
+  confirmed: "bg-green-100 text-green-800",
+  corrected: "bg-orange-100 text-orange-800",
+};

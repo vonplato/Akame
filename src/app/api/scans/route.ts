@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getTenantContext } from "@/lib/auth/tenant";
 import { db } from "@/lib/db";
 import { floorScans } from "@/lib/db/schema";
-import { eq, desc, and, count } from "drizzle-orm";
+import { eq, desc, count } from "drizzle-orm";
 
 const createScanSchema = z.object({
   imageUrl: z.string().url(),

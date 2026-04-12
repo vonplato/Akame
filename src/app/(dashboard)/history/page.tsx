@@ -3,7 +3,7 @@ import { getTenantContext } from "@/lib/auth/tenant";
 import { db } from "@/lib/db";
 import { floorScans } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { STATUS_COLORS } from "@/lib/constants";
 

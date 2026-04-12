@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/lib/db";
 import { floorScans, labels } from "@/lib/db/schema";
-import { count, eq } from "drizzle-orm";
+import { count } from "drizzle-orm";
 
 async function getAnalytics() {
   const [statusCounts, reviewCounts, labelCounts] = await Promise.all([

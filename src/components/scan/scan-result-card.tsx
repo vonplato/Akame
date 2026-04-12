@@ -1,18 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ConfidenceBadge } from "./confidence-badge";
-import { CATEGORY_LABEL_MAP, CONDITION_COLORS } from "@/lib/constants";
+import { CATEGORY_LABEL_MAP, CONDITION_COLORS, SEVERITY_COLORS } from "@/lib/constants";
 import type { FloorIdentificationResult } from "@/lib/ai/parse-result";
 
 interface ScanResultCardProps {
   result: FloorIdentificationResult;
 }
-
-const severityColors: Record<string, string> = {
-  minor: "text-yellow-700",
-  moderate: "text-orange-700",
-  severe: "text-red-700",
-};
 
 export function ScanResultCard({ result }: ScanResultCardProps) {
   return (
@@ -139,7 +133,7 @@ export function ScanResultCard({ result }: ScanResultCardProps) {
                     className="flex items-start gap-2 rounded-lg bg-gray-50 p-2 text-sm"
                   >
                     <span
-                      className={`font-medium capitalize ${severityColors[d.severity] || ""}`}
+                      className={`font-medium capitalize ${SEVERITY_COLORS[d.severity] || ""}`}
                     >
                       {d.type.replace(/_/g, " ")}
                     </span>

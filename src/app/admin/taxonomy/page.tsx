@@ -2,28 +2,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
 import { floorCategories, floorTypes } from "@/lib/db/schema";
-import { eq, count } from "drizzle-orm";
+import { count } from "drizzle-orm";
 
 async function getTaxonomy() {
-  const categories = await db
-    .select()
-    .from(floorCategories)
-    .orderBy(floorCategories.sortOrder);
-
-  const typeCounts = await db
-    .select({
-      categoryId: floorTypes.categoryId,
-      total: count(),
-    })
-    .from(floorTypes)
-    .groupBy(floorTypes.categoryId);
+  const [categories, typeCounts, types] = await Promise.all([
+    db.select().from(floorCategories).orderBy(floorCategories.sortOrder),
+    db
+      .select({ categoryId: floorTypes.categoryId, total: count() })
+      .from(floorTypes)
+      .groupBy(floorTypes.categoryId),
+    db
+      .select()
+      .from(floorTypes)
+      .orderBy(floorTypes.categoryId, floorTypes.sortOrder),
+  ]);
 
   const countMap = new Map(typeCounts.map((t) => [t.categoryId, t.total]));
-
-  const types = await db
-    .select()
-    .from(floorTypes)
-    .orderBy(floorTypes.categoryId, floorTypes.sortOrder);
 
   return { categories, types, countMap };
 }

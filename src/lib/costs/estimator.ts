@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { costDefaults, costOverrides, floorTypes, floorCategories } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import { CATEGORY_DB_SLUG_MAP } from "@/lib/constants";
 
 // Regional labor/material multipliers relative to national average
 const REGIONAL_MULTIPLIERS: Record<string, { material: number; labor: number }> = {
@@ -53,24 +54,23 @@ export async function estimateCost(
 
   if (!type) return null;
 
-  // Check for company override
-  const [override] = await db
-    .select()
-    .from(costOverrides)
-    .where(
-      and(
-        eq(costOverrides.companyId, companyId),
-        eq(costOverrides.floorTypeId, type.id)
+  const [[override], [defaults]] = await Promise.all([
+    db
+      .select()
+      .from(costOverrides)
+      .where(
+        and(
+          eq(costOverrides.companyId, companyId),
+          eq(costOverrides.floorTypeId, type.id)
+        )
       )
-    )
-    .limit(1);
-
-  // Get defaults
-  const [defaults] = await db
-    .select()
-    .from(costDefaults)
-    .where(eq(costDefaults.floorTypeId, type.id))
-    .limit(1);
+      .limit(1),
+    db
+      .select()
+      .from(costDefaults)
+      .where(eq(costDefaults.floorTypeId, type.id))
+      .limit(1),
+  ]);
 
   if (!defaults && !override) return null;
 
@@ -101,8 +101,6 @@ export async function estimateCost(
     region,
   };
 }
-
-import { CATEGORY_DB_SLUG_MAP } from "@/lib/constants";
 
 export function aiCategoryToDbSlug(aiCategory: string): string {
   return CATEGORY_DB_SLUG_MAP[aiCategory] || aiCategory;

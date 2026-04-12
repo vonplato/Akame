@@ -4,15 +4,10 @@ import { db } from "@/lib/db";
 import { floorCategories, floorTypes } from "@/lib/db/schema";
 
 async function getLibrary() {
-  const categories = await db
-    .select()
-    .from(floorCategories)
-    .orderBy(floorCategories.sortOrder);
-
-  const types = await db
-    .select()
-    .from(floorTypes)
-    .orderBy(floorTypes.categoryId, floorTypes.sortOrder);
+  const [categories, types] = await Promise.all([
+    db.select().from(floorCategories).orderBy(floorCategories.sortOrder),
+    db.select().from(floorTypes).orderBy(floorTypes.categoryId, floorTypes.sortOrder),
+  ]);
 
   return { categories, types };
 }

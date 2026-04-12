@@ -42,7 +42,6 @@ export default function ScanPage() {
     }
   };
 
-  // Camera mode
   if (mode === "camera") {
     return (
       <CameraCapture
@@ -52,7 +51,6 @@ export default function ScanPage() {
     );
   }
 
-  // Uploading / processing state
   if (scan.step === "uploading" || scan.step === "processing") {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-4">
@@ -62,7 +60,6 @@ export default function ScanPage() {
     );
   }
 
-  // Error state
   if (scan.step === "error") {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-4 text-center">

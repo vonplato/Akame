@@ -13,7 +13,6 @@ export async function POST(
     const { companyId } = await getTenantContext();
     const { scanId } = await params;
 
-    // Fetch the scan
     const [scan] = await db
       .select()
       .from(floorScans)
@@ -26,17 +25,14 @@ export async function POST(
       return Response.json({ error: "Scan not found" }, { status: 404 });
     }
 
-    // Mark as processing
     await db
       .update(floorScans)
       .set({ status: "processing", updatedAt: new Date() })
       .where(eq(floorScans.id, scanId));
 
     try {
-      // Run AI identification
       const result = await identifyFloor(scan.imageUrl);
 
-      // Update scan with results
       const [updated] = await db
         .update(floorScans)
         .set({
@@ -60,7 +56,6 @@ export async function POST(
 
       return Response.json(updated);
     } catch (aiError) {
-      // Mark as failed if AI errors
       await db
         .update(floorScans)
         .set({
